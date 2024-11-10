@@ -1,0 +1,100 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "rsjwt"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+[tool.maturin]
+features = ["pyo3/extension-module"]
+
+
+[tool.mypy]
+warn_redundant_casts = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py38"
+
+[tool.ruff.lint]
+extend-select = [
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  # "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  # "SIM",
+  # isort
+  "I",
+]
+extend-ignore = [
+    "E501",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = [
+    "rsjwt",
+    "tests",
+]
+
+[tool.hatch.version]
+path = "Cargo.toml"
+
+[tool.hatch.envs.default]
+dependencies = [
+    "mypy>1.6.1",
+    "ruff>0.1",
+]
+
+[tool.hatch.envs.default.scripts]
+build = [
+    "maturin develop",
+]
+check = [
+    "ruff rsjwt tests",
+    "ruff format --check rsjwt tests",
+    "mypy rsjwt tests",
+    "cargo clippy",
+]
+fmt = [
+    "cargo fmt",
+    "ruff --fix rsjwt tests",
+    "ruff format rsjwt tests",
+]
+test = [
+    "cargo test",
+    "build",
+    "pytest",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = [
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13",
+]
