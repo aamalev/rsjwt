@@ -41,10 +41,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      - name: Install hatch
-        run: pip3 install --upgrade hatch
       - name: Set version from tag
-        run: hatch version $GITHUB_REF_NAME
+        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -76,10 +74,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      - name: Install hatch
-        run: pip3 install --upgrade hatch
       - name: Set version from tag
-        run: hatch version $GITHUB_REF_NAME
+        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -108,10 +104,8 @@ jobs:
         with:
           python-version: 3.x
           architecture: ${{ matrix.platform.target }}
-      - name: Install hatch
-        run: pip3 install --upgrade hatch
       - name: Set version from tag
-        run: hatch version $GITHUB_REF_NAME
+        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -138,10 +132,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      - name: Install hatch
-        run: pip3 install --upgrade hatch
       - name: Set version from tag
-        run: hatch version $GITHUB_REF_NAME
+        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -158,10 +150,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install hatch
-        run: pip3 install --upgrade hatch
       - name: Set version from tag
-        run: hatch version $GITHUB_REF_NAME
+        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
