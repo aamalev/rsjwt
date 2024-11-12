@@ -27,7 +27,7 @@ jobs:
         run: cargo test
 
   pytest:
-    name: pytest on redis
+    name: Pytest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
