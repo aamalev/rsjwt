@@ -91,10 +91,10 @@ Using
   assert isinstance(token, str)
 
   td = v.decode(token)
-  assert td["exp"] == data["exp"]
   assert td["a"] == data["a"]
   assert td["s"] == data["s"]
   assert td["m"] == data["m"]
+  assert isinstance(td["exp"], float)
 
 
 Development
