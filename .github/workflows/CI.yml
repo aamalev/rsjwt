@@ -42,7 +42,7 @@ jobs:
         with:
           python-version: 3.x
       - name: Set version from tag
-        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
+        run: sed -i -e 's/^version = .*/version = "${{ github.ref_name }}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -75,7 +75,7 @@ jobs:
         with:
           python-version: 3.x
       - name: Set version from tag
-        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
+        run: sed -i -e 's/^version = .*/version = "${{ github.ref_name }}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -105,7 +105,7 @@ jobs:
           python-version: 3.x
           architecture: ${{ matrix.platform.target }}
       - name: Set version from tag
-        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
+        run: sed -i -e 's/^version = .*/version = "${{ github.ref_name }}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -133,7 +133,7 @@ jobs:
         with:
           python-version: 3.x
       - name: Set version from tag
-        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
+        run: sed -i -e 's/^version = .*/version = "${{ github.ref_name }}"/' Cargo.toml
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -151,7 +151,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set version from tag
-        run: sed -i -e 's/^version = .*/version = "${GITHUB_REF_NAME}"/' Cargo.toml
+        run: sed -i -e 's/^version = .*/version = "${{ github.ref_name }}"/' Cargo.toml
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
