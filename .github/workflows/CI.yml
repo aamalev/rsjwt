@@ -29,13 +29,13 @@ jobs:
             continue-on-error: true
           - runner: ubuntu-latest
             target: armv7
-            continue-on-error: true
+            continue-on-error: false
           - runner: ubuntu-latest
             target: s390x
-            continue-on-error: true
+            continue-on-error: false
           - runner: ubuntu-latest
             target: ppc64le
-            continue-on-error: true
+            continue-on-error: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
