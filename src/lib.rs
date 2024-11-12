@@ -1,27 +1,10 @@
 mod error;
 mod types;
-mod utils;
 use error::{DecodeError, EncodeError};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use pyo3::{exceptions::PyKeyError, prelude::*, types::PyModule, PyResult, Python};
+use pyo3::{prelude::*, types::PyModule, PyResult, Python};
 use std::collections::HashMap;
-use types::Value;
-use utils::{from_json, to_json};
-
-#[pyclass]
-struct TokenData {
-    claims: serde_json::Value,
-}
-
-#[pymethods]
-impl TokenData {
-    fn __getitem__(&self, py: Python<'_>, item: &str) -> PyResult<PyObject> {
-        match self.claims.get(item) {
-            Some(v) => from_json(py, v),
-            None => Err(PyKeyError::new_err("not found key {item}")),
-        }
-    }
-}
+use types::{TokenData, Value};
 
 #[pyclass]
 #[allow(clippy::upper_case_acronyms)]
@@ -50,20 +33,23 @@ impl JWT {
     }
 
     fn encode(&self, claims: HashMap<String, Value>) -> PyResult<String> {
-        let claims = to_json(claims)?;
+        let claims = serde_json::Value::from(Value::Map(claims));
         encode(&self.header, &claims, &self.key).map_err(|_| EncodeError::new_err("invalid claims"))
     }
 
     fn decode(&self, token: String) -> PyResult<TokenData> {
         let mut result = Err(DecodeError::new_err("not valid token"));
         for secret in self.secrets.iter() {
-            match decode::<serde_json::Value>(&token, secret, &self.validation) {
-                Ok(token) => {
-                    let claims = token.claims;
+            match decode::<Value>(&token, secret, &self.validation) {
+                Ok(jsonwebtoken::TokenData {
+                    header: _,
+                    claims: Value::Map(claims),
+                }) => {
                     result = Ok(TokenData { claims });
                     break;
                 }
                 Err(e) => result = Err(DecodeError::new_err(e.to_string())),
+                _ => (),
             }
         }
         result
