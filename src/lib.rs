@@ -33,7 +33,7 @@ impl JWT {
     }
 
     fn encode(&self, claims: HashMap<String, Value>) -> PyResult<String> {
-        let claims = serde_json::Value::from(Value::Map(claims));
+        let claims = Value::Dict(claims);
         encode(&self.header, &claims, &self.key).map_err(|_| EncodeError::new_err("invalid claims"))
     }
 
@@ -43,7 +43,7 @@ impl JWT {
             match decode::<Value>(&token, secret, &self.validation) {
                 Ok(jsonwebtoken::TokenData {
                     header: _,
-                    claims: Value::Map(claims),
+                    claims: Value::Dict(claims),
                 }) => {
                     result = Ok(TokenData { claims });
                     break;

@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -16,15 +17,36 @@ def test_decode():
         "exp": time.time() + 10,
         "s": "123",
         "a": ["123", 123],
+        "m": {"a": 1},
     }
     token = v.encode(data)
     td = v.decode(token)
     assert td["exp"] == data["exp"]
     assert td["a"] == data["a"]
     assert td["s"] == data["s"]
-    
-    
+    assert td["m"] == data["m"]
+
+
 def test_decode_error():
     v = rsjwt.JWT("123")
     with pytest.raises(rsjwt.DecodeError):
         v.decode("random")
+
+
+@pytest.mark.parametrize(
+    "dt",
+    [
+        datetime.now(timezone.utc) + timedelta(seconds=5),
+        time.time() + 5,
+        timedelta(seconds=5),
+    ],
+)
+def test_decode_dt(dt):
+    v = rsjwt.JWT("123")
+    data = {
+        "exp": dt,
+    }
+    token = v.encode(data)
+    td = v.decode(token)
+    now = time.time()
+    assert now < td["exp"] < now + 10
