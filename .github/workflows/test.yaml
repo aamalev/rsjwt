@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags: [ '*' ]
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  tests:
+    name: Rust test
+    strategy:
+      max-parallel: 3
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: cargo test
+        run: cargo test
+
+  pytest:
+    name: pytest on redis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: pip install -U hatch
+      - name: Build develop
+        run: hatch run maturin develop
+      - name: Run pytest
+        run: hatch run pytest
