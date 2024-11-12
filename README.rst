@@ -12,11 +12,11 @@ rsjwt
   :alt: Python versions
 
 .. image:: https://readthedocs.org/projects/rsjwt/badge/?version=latest
-  :target: https://github.com/aamalev/rsjwt-py#rsjwt
+  :target: https://github.com/aamalev/rsjwt#rsjwt
   :alt: Documentation Status
 
-.. image:: https://github.com/aamalev/rsjwt-py/workflows/Tests/badge.svg
-  :target: https://github.com/aamalev/rsjwt-py/actions?query=workflow%3ATests
+.. image:: https://github.com/aamalev/rsjwt/workflows/Tests/badge.svg
+  :target: https://github.com/aamalev/rsjwt/actions?query=workflow%3ATests
 
 .. image:: https://img.shields.io/pypi/dm/rsjwt.svg
   :target: https://pypi.org/project/rsjwt
