@@ -63,8 +63,9 @@ path = "Cargo.toml"
 
 [tool.hatch.envs.default]
 dependencies = [
-    "mypy>1.6.1",
-    "ruff>0.1",
+    "maturin>=1.7,<2.0",
+    "mypy>1.6.1,<2.0",
+    "ruff>0.1,<2.0",
 ]
 
 [tool.hatch.envs.default.scripts]
