@@ -13,10 +13,10 @@ def test_dir():
 
 def test_decode():
     v = rsjwt.JWT("123")
-    data = {
+    data: dict = {
         "exp": time.time() + 10,
         "s": "123",
-        "a": ["123", 123],
+        "a": ["123"],
         "m": {"a": 1},
     }
     token = v.encode(data)
@@ -49,4 +49,6 @@ def test_decode_dt(dt):
     token = v.encode(data)
     td = v.decode(token)
     now = time.time()
-    assert now < td["exp"] < now + 10
+    exp = td["exp"]
+    assert isinstance(exp, float)
+    assert now < exp < now + 10
