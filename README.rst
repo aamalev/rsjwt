@@ -103,14 +103,22 @@ Bench
 .. code-block:: bash
 
     % hatch run bench:py
-    PyJWT: Decode time (1000000 iterations): 6.1180 seconds
-    RSJWT: Decode time (1000000 iterations): 2.3199 seconds
+    Python: 3.13.0 (main, Oct  7 2024, 05:02:14) [Clang 16.0.0 (clang-1600.0.26.4)]
+    Algorithm: HS256
+    Iterations: 1000000
+
+
+|         package |       secs      |        n        |
+| --------------- | --------------- | --------------- |
+|           rsjwt |      2.3461     |      1.000      |
+|           pyjwt |      6.3386     |      2.702      |
+|         authlib |      7.4025     |      3.155      |
 
 
 Development
 -----------
 
-.. code-block:: python
+.. code-block:: bash
 
     cargo fmt
     cargo clippy
@@ -119,7 +127,7 @@ Development
 
 or use hatch envs:
 
-.. code-block:: python
+.. code-block:: bash
 
     hatch run fmt
     hatch run check
