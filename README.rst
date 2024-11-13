@@ -97,6 +97,15 @@ Using
   assert isinstance(td["exp"], float)
 
 
+Bench
+-----
+
+.. code-block:: bash
+    % hatch run bench:py
+    PyJWT: Decode time (1000000 iterations): 6.1180 seconds
+    RSJWT: Decode time (1000000 iterations): 2.3199 seconds
+
+
 Development
 -----------
 

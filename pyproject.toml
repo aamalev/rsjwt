@@ -11,6 +11,8 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
 
@@ -81,8 +83,8 @@ check = [
 ]
 fmt = [
     "cargo fmt",
-    "ruff check --fix rsjwt tests",
-    "ruff format rsjwt tests",
+    "ruff check --fix rsjwt tests benches",
+    "ruff format rsjwt tests benches",
 ]
 test = [
     "cargo test",
@@ -98,4 +100,14 @@ python = [
     "3.11",
     "3.12",
     "3.13",
+]
+
+[tool.hatch.envs.bench]
+dependencies = [
+    "pyjwt",
+    "python-jose==3.0.1"
+]
+[tool.hatch.envs.bench.scripts]
+py = [
+    "python benches/bench.py",
 ]
