@@ -84,4 +84,15 @@ impl TokenData {
             None => Err(PyKeyError::new_err("not found key {item}")),
         }
     }
+    fn to_dict(&self, py: Python<'_>) -> PyResult<PyObject> {
+        Ok(self
+            .claims
+            .iter()
+            .fold(PyDict::new_bound(py), |d, (k, v)| {
+                d.set_item(k.to_object(py), v.to_object(py))
+                    .unwrap_or_default();
+                d
+            })
+            .to_object(py))
+    }
 }

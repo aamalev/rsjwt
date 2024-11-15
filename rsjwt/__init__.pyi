@@ -10,7 +10,10 @@ from typing import List, Mapping, Optional, Union
 from .exceptions import DecodeError, EncodeError
 
 Value = Union[str, int, float, List[Value], Mapping[str, Value], timedelta, datetime]
-TokenData = Mapping[str, Value]
+
+class TokenData:
+    def __getitem__(self, item: str) -> Value: ...
+    def to_dict(self) -> Mapping[str, Value]: ...
 
 class JWT:
     def __init__(
