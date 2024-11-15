@@ -1,9 +1,10 @@
 import argparse
 import json
 import sys
-from dataclasses import dataclass
 from timeit import timeit
-from typing import Callable
+from typing import Callable, List, Optional
+
+import rsjwt
 
 ALG = "HS256"
 HEADER = {"alg": ALG}
@@ -11,134 +12,134 @@ DATA = {"some": "payload"}
 SECRET = "secret"
 
 
-@dataclass
 class Item:
     name: str
-    decode: Callable
+    decode: Optional[Callable] = None
 
 
-def on_pyjwt() -> Item:
-    import jwt
+class ItemRsJWT(Item):
+    name = "rsjwt"
 
-    token = jwt.encode(DATA, SECRET, algorithm=ALG)
-    item = Item(
-        name="pyjwt",
-        decode=lambda: jwt.decode(token, SECRET, algorithms=[ALG]),
-    )
-    assert DATA == item.decode()
-    return item
+    def __init__(self):
+        import rsjwt
 
-
-def on_jose() -> Item:
-    from jose import jwt
-
-    token = jwt.encode(DATA, SECRET, algorithm=ALG)
-    item = Item(
-        name="python-jose",
-        decode=lambda: jwt.decode(token, SECRET, algorithms=[ALG]),
-    )
-    assert DATA == item.decode()
-    return item
+        c = rsjwt.JWT(SECRET, required_spec_claims=[])
+        # token = c.encode(DATA)
+        self.decode = lambda token: c.decode(token).to_dict()
 
 
-def on_authlib() -> Item:
-    from authlib.jose import jwt
+class ItemPyJWT(Item):
+    name = "pyjwt"
 
-    token = jwt.encode(HEADER, DATA, SECRET)
-    item = Item(
-        name="authlib",
-        decode=lambda: jwt.decode(token, SECRET),
-    )
-    assert DATA == item.decode()
-    return item
+    def __init__(self):
+        import jwt
+
+        # token = jwt.encode(DATA, SECRET, algorithm=ALG)
+        self.decode = lambda token: jwt.decode(token, SECRET, algorithms=[ALG])
 
 
-def on_jwcrypto() -> Item:
-    from jwcrypto import jwk, jwt
+class ItemJose(Item):
+    name = "python-jose"
 
-    t = jwt.JWT(header=HEADER, claims=DATA)
-    key = jwk.JWK.from_password(SECRET)
-    t.make_signed_token(key)
-    token = t.serialize()
-
-    def decode():
-        t.deserialize(token, key)
-        return t.claims
-
-    item = Item(
-        name="jwcrypto",
-        decode=decode,
-    )
-    decoded = json.loads(item.decode())
-    assert DATA == decoded, decoded
-    return item
+    def __init__(self):
+        try:
+            from jose import jwt
+        except Exception:
+            pass
+        else:
+            # token = jwt.encode(DATA, SECRET, algorithm=ALG)
+            self.decode = lambda token: jwt.decode(token, SECRET, algorithms=[ALG])
 
 
-def on_rsjwt() -> Item:
-    import rsjwt
+class ItemAuthLib(Item):
+    name = "authlib"
 
-    c = rsjwt.JWT(SECRET, required_spec_claims=[])
+    def __init__(self):
+        from authlib.jose import jwt
 
-    token = c.encode(DATA)
-    item = Item(
-        name="rsjwt",
-        decode=lambda: c.decode(token),
-    )
-    td = item.decode()
-    for k in DATA:
-        assert DATA[k] == td[k]
-    return item
+        # token = jwt.encode(HEADER, DATA, SECRET)
+        self.decode = lambda token: jwt.decode(token, SECRET)
+
+
+class ItemJwCripto(Item):
+    name = "jwcrypto"
+
+    def __init__(self):
+        from jwcrypto import jwk, jwt
+
+        key = jwk.JWK.from_password(SECRET)
+
+        t = jwt.JWT(header=HEADER)
+        # t.make_signed_token(key)
+        # token = t.serialize()
+
+        def decode(token):
+            t.deserialize(token, key)
+            return json.loads(t.claims)
+
+        self.decode = decode
+
+
+class Table:
+    sep = "|"
+
+    def __init__(self, colums: List[str], default_width=12):
+        self.colums = colums
+        self._default = default_width
+
+    def print_line(self, *args: str):
+        line = self.sep
+        for item in args:
+            line += item.rjust(self._default)
+            line += self.sep
+        print(line)
+
+    def print_head(self):
+        self.print_line(*self.colums)
+        args = []
+        for _ in self.colums:
+            args.append("-" * self._default)
+        self.print_line(*args)
 
 
 def main(opts: argparse.Namespace):
     print("Python:", sys.version)
-    print("Algorithm:", ALG)
     print("Iterations:", opts.n)
     print()
-    c1, c2, c3 = 15, 15, 15
-    print(
-        "|",
-        "package".rjust(c1),
-        "|",
-        "secs".center(c2),
-        "|",
-        "n".center(c3),
-        "|",
+    print("Algorithm:", ALG)
+    print("Method: decode")
+    table = Table(
+        colums=[
+            "package",
+            "secs",
+            "n",
+        ]
     )
-    print(
-        "|",
-        "-" * c1,
-        "|",
-        "-" * c2,
-        "|",
-        "-" * c3,
-        "|",
-    )
+    table.print_head()
+
     base = None
 
-    for f in (
-        on_rsjwt,
-        on_pyjwt,
-        on_authlib,
-        on_jose,
-        on_jwcrypto,
-    ):
-        try:
-            item = f()
-        except Exception:
-            continue
-        decode_time = timeit(item.decode, number=opts.n)
-        if not base:
-            base = decode_time
-        print(
-            "|",
-            item.name.rjust(c1),
-            "|",
-            f"{decode_time:.4f}".rjust(c2),
-            "|",
-            f"{decode_time / base:.3f}".rjust(c3),
-            "|",
-        )
+    token = rsjwt.JWT(SECRET).encode(DATA)
+
+    for f in Item.__subclasses__():
+        item = f()
+        if item.decode is not None:
+            assert item.decode(token) == DATA
+
+            decode_time = timeit(lambda: item.decode(token), number=opts.n)
+            if not base:
+                base = decode_time
+            table.print_line(
+                item.name,
+                f"{decode_time:.4f}",
+                f"{decode_time / base:.3f}",
+            )
+        else:
+            table.print_line(
+                item.name,
+                "fail",
+                "",
+            )
 
 
 if __name__ == "__main__":
