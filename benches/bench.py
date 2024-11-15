@@ -126,7 +126,7 @@ def main(opts: argparse.Namespace):
         if item.decode is not None:
             assert item.decode(token) == DATA
 
-            decode_time = timeit(lambda: item.decode(token), number=opts.n)
+            decode_time = timeit(lambda: item.decode(token), number=opts.n)  # noqa
             if not base:
                 base = decode_time
             table.print_line(
