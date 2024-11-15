@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 from dataclasses import dataclass
 from timeit import timeit
@@ -8,6 +9,7 @@ ALG = "HS256"
 HEADER = {"alg": ALG}
 DATA = {"some": "payload"}
 SECRET = "secret"
+
 
 @dataclass
 class Item:
@@ -48,6 +50,27 @@ def on_authlib() -> Item:
         decode=lambda: jwt.decode(token, SECRET),
     )
     assert DATA == item.decode()
+    return item
+
+
+def on_jwcrypto() -> Item:
+    from jwcrypto import jwk, jwt
+
+    t = jwt.JWT(header=HEADER, claims=DATA)
+    key = jwk.JWK.from_password(SECRET)
+    t.make_signed_token(key)
+    token = t.serialize()
+
+    def decode():
+        t.deserialize(token, key)
+        return t.claims
+
+    item = Item(
+        name="jwcrypto",
+        decode=decode,
+    )
+    decoded = json.loads(item.decode())
+    assert DATA == decoded, decoded
     return item
 
 
@@ -95,9 +118,10 @@ def main(opts: argparse.Namespace):
 
     for f in (
         on_rsjwt,
-        on_jose,
         on_pyjwt,
         on_authlib,
+        on_jose,
+        on_jwcrypto,
     ):
         try:
             item = f()
@@ -110,14 +134,14 @@ def main(opts: argparse.Namespace):
             "|",
             item.name.rjust(c1),
             "|",
-            f"{decode_time:.4f}".center(c2),
+            f"{decode_time:.4f}".rjust(c2),
             "|",
-            f"{decode_time / base:.3f}".center(c3),
+            f"{decode_time / base:.3f}".rjust(c3),
             "|",
         )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", default=1000000)
+    parser.add_argument("-n", type=int, default=1000000)
     main(parser.parse_args())
