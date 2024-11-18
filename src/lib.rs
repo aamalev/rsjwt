@@ -1,9 +1,9 @@
 mod error;
 mod types;
 use error::{DecodeError, EncodeError};
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use pyo3::{prelude::*, types::PyModule, PyResult, Python};
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 use types::{TokenData, Value};
 
 #[pyclass]
@@ -18,14 +18,20 @@ struct JWT {
 #[pymethods]
 impl JWT {
     #[new]
-    #[pyo3(signature = (secret, required_spec_claims=None))]
-    fn new(secret: String, required_spec_claims: Option<Vec<String>>) -> Self {
-        let mut validation = Validation::default();
+    #[pyo3(signature = (
+        secret,
+        required_spec_claims=None,
+        algorithm="HS256",
+    ))]
+    fn new(secret: String, required_spec_claims: Option<Vec<String>>, algorithm: &str) -> Self {
+        let algorithm = Algorithm::from_str(algorithm).unwrap_or_default();
+        let mut validation = Validation::new(algorithm);
         if let Some(ref r) = required_spec_claims {
             validation.set_required_spec_claims(r);
         }
+        let header = Header::new(algorithm);
         Self {
-            header: Header::default(),
+            header,
             key: EncodingKey::from_secret(secret.as_ref()),
             validation,
             secrets: vec![DecodingKey::from_secret(secret.as_ref())],
