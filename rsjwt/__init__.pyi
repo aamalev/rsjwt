@@ -16,9 +16,12 @@ SYMMETRIC = Literal[
 ]
 Value = Union[str, int, float, List[Value], Mapping[str, Value], timedelta, datetime]
 
-class TokenData:
+class TokenData(Mapping[str, Value]):
+    claims: Mapping[str, Value]
+
     def __getitem__(self, item: str) -> Value: ...
-    def to_dict(self) -> Mapping[str, Value]: ...
+    def __iter__(self): ...
+    def __len__(self) -> int: ...
 
 class JWT:
     def __init__(

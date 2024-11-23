@@ -72,7 +72,9 @@ impl ToPyObject for Value {
 }
 
 #[pyclass]
+#[derive(Debug)]
 pub struct TokenData {
+    #[pyo3(get)]
     pub claims: HashMap<String, Value>,
 }
 
@@ -84,15 +86,43 @@ impl TokenData {
             None => Err(PyKeyError::new_err("not found key {item}")),
         }
     }
-    fn to_dict(&self, py: Python<'_>) -> PyResult<PyObject> {
-        Ok(self
+
+    fn get(&self, py: Python<'_>, item: &str) -> Option<PyObject> {
+        self.claims.get(item).map(|v| v.to_object(py))
+    }
+
+    fn __len__(&self) -> PyResult<usize> {
+        Ok(self.claims.len())
+    }
+
+    fn __contains__(&self, item: &str) -> PyResult<bool> {
+        Ok(self.claims.contains_key(item))
+    }
+
+    fn keys(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let keys: Vec<String> = self.claims.keys().cloned().collect();
+        Ok(keys.to_object(py))
+    }
+
+    fn values(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let values: Vec<PyObject> = self.claims.values().map(|v| v.to_object(py)).collect();
+        Ok(values.to_object(py))
+    }
+
+    fn items(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let items: Vec<(String, PyObject)> = self
             .claims
             .iter()
-            .fold(PyDict::new_bound(py), |d, (k, v)| {
-                d.set_item(k.to_object(py), v.to_object(py))
-                    .unwrap_or_default();
-                d
-            })
-            .to_object(py))
+            .map(|(k, v)| (k.clone(), v.to_object(py)))
+            .collect();
+        Ok(items.to_object(py))
+    }
+
+    fn __iter__(&self, py: Python<'_>) -> PyResult<PyObject> {
+        self.keys(py)
+    }
+
+    fn __repr__(&self) -> String {
+        format!("{:?}", self)
     }
 }
