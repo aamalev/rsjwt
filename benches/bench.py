@@ -25,7 +25,7 @@ class ItemRsJWT(Item):
 
         c = rsjwt.JWT(SECRET, required_spec_claims=[])
         # token = c.encode(DATA)
-        self.decode = lambda token: c.decode(token).to_dict()
+        self.decode = lambda token: c.decode(token).claims
 
 
 class ItemPyJWT(Item):
@@ -36,6 +36,16 @@ class ItemPyJWT(Item):
 
         # token = jwt.encode(DATA, SECRET, algorithm=ALG)
         self.decode = lambda token: jwt.decode(token, SECRET, algorithms=[ALG])
+
+
+class ItemAuthLib(Item):
+    name = "authlib"
+
+    def __init__(self):
+        from authlib.jose import jwt
+
+        # token = jwt.encode(HEADER, DATA, SECRET)
+        self.decode = lambda token: jwt.decode(token, SECRET)
 
 
 class ItemJose(Item):
@@ -49,16 +59,6 @@ class ItemJose(Item):
         else:
             # token = jwt.encode(DATA, SECRET, algorithm=ALG)
             self.decode = lambda token: jwt.decode(token, SECRET, algorithms=[ALG])
-
-
-class ItemAuthLib(Item):
-    name = "authlib"
-
-    def __init__(self):
-        from authlib.jose import jwt
-
-        # token = jwt.encode(HEADER, DATA, SECRET)
-        self.decode = lambda token: jwt.decode(token, SECRET)
 
 
 class ItemJwCripto(Item):
