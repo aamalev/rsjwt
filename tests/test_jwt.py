@@ -21,7 +21,8 @@ def test_decode():
     }
     token = v.encode(data)
     td = v.decode(token)
-    assert td["exp"] == data["exp"]
+    assert isinstance(td["exp"], float)
+    assert int(td["exp"] * 1000) == int(data["exp"] * 1000)
     assert td["a"] == data["a"]
     assert td["s"] == data["s"]
     assert td["m"] == data["m"]

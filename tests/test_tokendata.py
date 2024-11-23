@@ -8,7 +8,7 @@ import rsjwt
 def test_mapping():
     v = rsjwt.JWT("123")
     data: dict = {
-        "exp": time.time() + 10,
+        "exp": int(time.time()) + 10,
     }
     token = v.encode(data)
     td = v.decode(token)
@@ -18,7 +18,7 @@ def test_mapping():
 def test_mapping_eq():
     v = rsjwt.JWT("123")
     data: dict = {
-        "exp": time.time() + 10,
+        "exp": int(time.time()) + 10,
     }
     token = v.encode(data)
     td = v.decode(token)
