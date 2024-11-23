@@ -6,7 +6,7 @@ use std::{
 use pyo3::{exceptions::PyKeyError, prelude::*};
 use serde::{Deserialize, Serialize};
 
-#[derive(FromPyObject, Deserialize, Serialize, Clone, Debug)]
+#[derive(FromPyObject, IntoPyObject, Deserialize, Serialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -43,21 +43,6 @@ fn to_f64(dt: &SystemTime) -> f64 {
         .unwrap_or(0.0)
 }
 
-impl ToPyObject for Value {
-    fn to_object(&self, py: Python<'_>) -> PyObject {
-        match self {
-            Value::Bool(b) => b.to_object(py),
-            Value::String(s) => s.to_object(py),
-            Value::Float(f) => f.to_object(py),
-            Value::Int(i) => i.to_object(py),
-            Value::TimeDelta(duration) => duration.to_object(py),
-            Value::DateTime(system_time) => system_time.to_object(py),
-            Value::List(v) => v.to_object(py),
-            Value::Dict(m) => m.to_object(py),
-        }
-    }
-}
-
 #[pyclass]
 #[derive(Debug)]
 pub struct TokenData {
@@ -67,15 +52,15 @@ pub struct TokenData {
 
 #[pymethods]
 impl TokenData {
-    fn __getitem__(&self, py: Python<'_>, item: &str) -> PyResult<PyObject> {
-        match self.claims.get(item) {
-            Some(v) => Ok(v.to_object(py)),
-            None => Err(PyKeyError::new_err("not found key {item}")),
-        }
+    fn __getitem__(&self, item: &str) -> PyResult<Value> {
+        self.claims
+            .get(item)
+            .cloned()
+            .ok_or(PyKeyError::new_err("not found key {item}"))
     }
 
-    fn get(&self, py: Python<'_>, item: &str) -> Option<PyObject> {
-        self.claims.get(item).map(|v| v.to_object(py))
+    fn get(&self, item: &str) -> Option<Value> {
+        self.claims.get(item).cloned()
     }
 
     fn __len__(&self) -> PyResult<usize> {
@@ -86,27 +71,20 @@ impl TokenData {
         Ok(self.claims.contains_key(item))
     }
 
-    fn keys(&self, py: Python<'_>) -> PyResult<PyObject> {
-        let keys: Vec<String> = self.claims.keys().cloned().collect();
-        Ok(keys.to_object(py))
+    fn keys(&self) -> PyResult<Vec<String>> {
+        Ok(self.claims.keys().cloned().collect())
     }
 
-    fn values(&self, py: Python<'_>) -> PyResult<PyObject> {
-        let values: Vec<PyObject> = self.claims.values().map(|v| v.to_object(py)).collect();
-        Ok(values.to_object(py))
+    fn values(&self) -> PyResult<Vec<Value>> {
+        Ok(self.claims.values().cloned().collect())
     }
 
-    fn items(&self, py: Python<'_>) -> PyResult<PyObject> {
-        let items: Vec<(String, PyObject)> = self
-            .claims
-            .iter()
-            .map(|(k, v)| (k.clone(), v.to_object(py)))
-            .collect();
-        Ok(items.to_object(py))
+    fn items(&self) -> PyResult<Vec<(String, Value)>> {
+        Ok(self.claims.clone().into_iter().collect())
     }
 
-    fn __iter__(&self, py: Python<'_>) -> PyResult<PyObject> {
-        self.keys(py)
+    fn __iter__(&self) -> PyResult<Vec<String>> {
+        self.keys()
     }
 
     fn __repr__(&self) -> String {

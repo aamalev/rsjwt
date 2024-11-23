@@ -64,8 +64,8 @@ impl JWT {
 
 #[pymodule]
 fn rsjwt(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("EncodeError", py.get_type_bound::<EncodeError>())?;
-    m.add("DecodeError", py.get_type_bound::<DecodeError>())?;
+    m.add("EncodeError", py.get_type::<EncodeError>())?;
+    m.add("DecodeError", py.get_type::<DecodeError>())?;
     m.add_class::<JWT>()?;
     m.add_class::<TokenData>()?;
     Ok(())

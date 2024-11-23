@@ -10,5 +10,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 jsonwebtoken = "9.3.0"
-pyo3 = { version = "0.22.6", features = [] }
+pyo3 = { version = "0.23.1", features = [] }
 serde = { version = "1.0.215", features = ["derive"] }
