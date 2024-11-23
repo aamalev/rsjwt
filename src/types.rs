@@ -3,11 +3,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use pyo3::{
-    exceptions::PyKeyError,
-    prelude::*,
-    types::{PyDict, PyList},
-};
+use pyo3::{exceptions::PyKeyError, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(FromPyObject, Deserialize, Serialize, Clone, Debug)]
@@ -15,8 +11,8 @@ use serde::{Deserialize, Serialize};
 pub enum Value {
     Bool(bool),
     String(String),
-    Float(f64),
     Int(i64),
+    Float(f64),
     #[serde(serialize_with = "serialize_timedelta")]
     TimeDelta(Duration),
     #[serde(serialize_with = "serialize_datetime")]
@@ -56,17 +52,8 @@ impl ToPyObject for Value {
             Value::Int(i) => i.to_object(py),
             Value::TimeDelta(duration) => duration.to_object(py),
             Value::DateTime(system_time) => system_time.to_object(py),
-            Value::List(vec) => {
-                PyList::new_bound(py, vec.iter().map(|v| v.to_object(py))).to_object(py)
-            }
-            Value::Dict(m) => m
-                .iter()
-                .fold(PyDict::new_bound(py), |d, (k, v)| {
-                    d.set_item(k.to_object(py), v.to_object(py))
-                        .unwrap_or_default();
-                    d
-                })
-                .to_object(py),
+            Value::List(v) => v.to_object(py),
+            Value::Dict(m) => m.to_object(py),
         }
     }
 }
