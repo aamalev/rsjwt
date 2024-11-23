@@ -60,6 +60,9 @@ Features
 --------
 
 * Encode and decode JWT
+* Support HS256, HS384, HS512
+* encode datetime.timedelta to float (now + delta)
+* encode datetime.datetime with timezone (example datetime.now(timezone.utc))
 
 
 Install
@@ -80,7 +83,7 @@ Using
   import rsjwt
 
 
-  v = rsjwt.JWT("123")
+  v = rsjwt.JWT("my-secret")
   data = {
       "exp": timedelta(hours=8),
       "s": "123",
@@ -146,3 +149,4 @@ or use hatch envs:
     hatch run fmt
     hatch run check
     hatch run build
+    hatch run test
