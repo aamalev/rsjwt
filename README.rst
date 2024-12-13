@@ -19,7 +19,7 @@ rsjwt
   :target: https://github.com/aamalev/rsjwt/actions?query=workflow%3ATests
 
 .. image:: https://img.shields.io/pypi/dm/rsjwt.svg
-  :target: https://pypi.org/project/rsjwt
+  :target: https://pypistats.org/packages/rsjwt
 
 |
 
