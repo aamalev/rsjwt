@@ -9,6 +9,6 @@ name = "rsjwt"
 crate-type = ["cdylib"]
 
 [dependencies]
-jsonwebtoken = "9.3.0"
+jsonwebtoken = "10.4.0"
 pyo3 = { version = "0.29.0", features = [] }
 serde = { version = "1.0.215", features = ["derive"] }
